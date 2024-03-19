@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
+const validator = require("validator");
 const User = require('../models/userModel');
 const { error } = require('console');
 
@@ -12,13 +12,26 @@ const { error } = require('console');
 // @accesss Public
 const registerUser = asyncHandler(async (req, res) => {
     
-    const {name, email, password} =req.body;
+    const {name, email, password, role} =req.body;
 
 
     //Validation
-    if(!name || !email || !password){
+    if(!name || !email || !password || !role){
      res.status(400)
      throw new Error('Please include all fields')
+    }
+
+     //check whether the email is a valid one
+     if (!validator.isEmail(email)) {
+    res.status(400)
+     throw new Error('Email is not valid')
+     }
+
+     // Validate role
+    const validRoles = ['Student', 'Faculty', 'Admin'];
+    if (!validRoles.includes(role)) {
+        res.status(400);
+        throw new Error('Invalid role. Role must be one of Student, Faculty, or Admin');
     }
 
 
@@ -39,15 +52,17 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create({
         name,
         email,
-        password: hashedPassword
-    })
+        password: hashedPassword,
+        role,
+    });
 
     if(user){
         res.status(201).json({
         _id:user._id,
         name: user.name,
         email: user.email,
-        token:generateToken(user._id)
+        role: user.role,
+        token: generateToken(user._id, user.role),
         })
  } else{
     res.status(400)
@@ -71,7 +86,8 @@ const loginUser = asyncHandler(async (req, res) => {
         _id:user._id,
         name: user.name,
         email: user.email,
-        token:generateToken(user._id),  
+        role: user.role,
+        token: generateToken(user._id, user.role),  
     })
     
     
@@ -97,8 +113,8 @@ const getMe = asyncHandler(async (req, res) => {
 })
 
 //Generate token
-const generateToken = (id) => {
-    return jwt.sign({id}, process.env.JWT_SECRET, {
+const generateToken = (id, role) => {
+    return jwt.sign({ id, role }, process.env.JWT_SECRET, {
         expiresIn: '30d',
     })
 }
