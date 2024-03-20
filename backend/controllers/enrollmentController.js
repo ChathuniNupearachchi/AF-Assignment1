@@ -37,19 +37,49 @@ module.exports.enrollCourse__controller = asyncHandler(async (req, res) => {
 
 module.exports.getEnrolledStudents__contoller = asyncHandler(async (req, res) => {
     try {
-        const { courseId } = req.params;
+         
 
-        // Find the course
-        const course = await CourseModel.findById(courseId);
-        if (!course) {
-            return res.status(404).json({ error: 'Course not found' });
-        }
-
-        // Find all enrollments for the specified course
-        const enrollments = await CourseEnrollmentModel.find({ courseId }).populate('studentId', 'name',  'email');
+        // Find all enrollments  
+        const enrollments = await CourseEnrollmentModel.find().populate('courseId', 'courseName').populate('studentId', 'name');
         res.json({ enrollments });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 })
+
+module.exports.getEnrolledStudentsForCourse__contoller = asyncHandler(async (req, res) => {
+    try {
+         const { courseId } = req.params;
+
+        //Find the course
+        const course = await CourseModel.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+
+        // Find all enrollments for the specified course
+        const enrollments = await CourseEnrollmentModel.find().populate('courseId', 'courseName').populate('studentId', 'name');
+        res.json({ enrollments });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+module.exports.deleteEnrolledStudents__contoller = asyncHandler(async (req, res, next) => {
+    try {
+      const { enrollmentId } = req.body;
+      console.log(enrollmentId)
+      const enrollment = await CourseEnrollmentModel.findOneAndDelete({ _id: enrollmentId });
+      return res.status(200).json({
+        enrollment,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(400).json({
+        error: "Something went wrong",
+      });
+    }
+  });
+  
