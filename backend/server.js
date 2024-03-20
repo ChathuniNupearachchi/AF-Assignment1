@@ -18,9 +18,15 @@ app.get('/', (req, res) => {
     res.status(200).json({message: 'Welcome to the SLIIT'})
 })
 
-//Routes
-app.use('/api/users', require('./routes/userRoutes'))
+//User Routes
+app.use('/api/users', require('./routes/userRoutes'));
+
+//Course Routes
 app.use('/api/courses', require('./routes/courseRoute'));
+
+//Enroll Routes
+app.use('/api/enrollment',require('./routes/enrollRoute'));
+
 app.use(errorHandler)
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT} `))

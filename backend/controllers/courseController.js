@@ -1,8 +1,9 @@
 const CourseModel = require("../models/CourseModel");
 const UserModel = require("../models/userModel");
+const asyncHandler = require('express-async-handler')
 //const cloudinary=require('../middlewares/cloudinary')
 
-module.exports.postCourse__controller = async (req, res, next) => {
+module.exports.postCourse__controller = asyncHandler(async (req, res, next) => {
   try {
     const {courseName, courseDescription } = req.body;
 
@@ -37,9 +38,9 @@ module.exports.postCourse__controller = async (req, res, next) => {
       error: "Something went wrong",
     });
   }
-};
+});
 
-module.exports.getCourses__controller = async (req, res, next) => {
+module.exports.getCourses__controller = asyncHandler(async (req, res, next) => {
   try {
     const courses = await CourseModel.find().populate(
       "createdAt",
@@ -54,9 +55,9 @@ module.exports.getCourses__controller = async (req, res, next) => {
       error: "Something went wrong",
     });
   }
-};
+});
 
-module.exports.getOneCourse__controller = async (req, res, next) => {
+module.exports.getOneCourse__controller = asyncHandler(async (req, res, next) => {
   try {
     const { courseId } = req.params;
     console.log(courseId);
@@ -70,9 +71,9 @@ module.exports.getOneCourse__controller = async (req, res, next) => {
       error: "Something went wrong",
     });
   }
-};
+});
 
-module.exports.deleteCourse__Controller = async (req, res, next) => {
+module.exports.deleteCourse__Controller = asyncHandler(async (req, res, next) => {
   try {
     const { courseId } = req.body;
     console.log(courseId)
@@ -86,9 +87,9 @@ module.exports.deleteCourse__Controller = async (req, res, next) => {
       error: "Something went wrong",
     });
   }
-};
+});
 
-module.exports.assignFacultyToCourse__controller = async (req, res, next) => {
+module.exports.assignFacultyToCourse__controller = asyncHandler(async (req, res, next) => {
   try {
 
     const { courseId, facultyId } = req.body;
@@ -125,4 +126,4 @@ module.exports.assignFacultyToCourse__controller = async (req, res, next) => {
     });
     
   }
-};
+});
