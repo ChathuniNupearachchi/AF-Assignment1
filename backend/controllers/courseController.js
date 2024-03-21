@@ -1,7 +1,7 @@
 const CourseModel = require("../models/CourseModel");
 const UserModel = require("../models/userModel");
 const asyncHandler = require('express-async-handler')
-//const cloudinary=require('../middlewares/cloudinary')
+
 
 module.exports.postCourse__controller = asyncHandler(async (req, res, next) => {
   try {

@@ -3,12 +3,12 @@ const mongoose = require("mongoose");
 
 const timetableSchema = mongoose.Schema(
     {
-        course: {
+        courseId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Course",
             required: true,
           },
-        faculty: {
+        facultyId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User", 
             required: true, 

@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const sessionSchema = mongoose.Schema(
 
     {
-        Date:{
+        date:{
             type: Date,
             required: true
         },
@@ -36,7 +36,7 @@ const sessionSchema = mongoose.Schema(
         },
 
         Resource:{
-            ype:mongoose.Schema.Types.ObjectId,
+            type:mongoose.Schema.Types.ObjectId,
             ref:'Resource',
             
         }
