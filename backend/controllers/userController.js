@@ -34,6 +34,43 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('Invalid role. Role must be one of Student, Faculty, or Admin');
     }
 
+    let Id;
+
+    if (role == 'Student') {
+        let newId;
+        do {
+            // Generate a random four-digit number
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            newId = "ST" + randomNum.toString();
+        } while (await User.findOne({ id: newId })); // Check if the generated ID already exists
+        
+        Id = newId;
+    }
+
+    if (role == 'Faculty') {
+        let newId;
+        do {
+            // Generate a random four-digit number
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            newId = "FAC" + randomNum.toString();
+        } while (await User.findOne({ id: newId })); // Check if the generated ID already exists
+        
+        Id = newId;
+    }
+
+    if (role == 'Admin') {
+        let newId;
+        do {
+            // Generate a random four-digit number
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            newId = "AD" + randomNum.toString();
+        } while (await User.findOne({ Id: newId })); // Check if the generated ID already exists
+        
+        Id = newId;
+    }
+
+
+
 
     //Find if user already exists
     const userExists = await User.findOne({email})
@@ -48,17 +85,19 @@ const registerUser = asyncHandler(async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt)
     
 
+
     //Create user
     const user = await User.create({
         name,
         email,
         password: hashedPassword,
         role,
+        Id,
     });
 
     if(user){
         res.status(201).json({
-        _id:user._id,
+        id:user.Id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -83,7 +122,7 @@ const loginUser = asyncHandler(async (req, res) => {
     //Check user and password match
     if(user && (await bcrypt.compare(password, user.password))){
       res.status(200).json({
-        _id:user._id,
+        _id:user.Id,
         name: user.name,
         email: user.email,
         role: user.role,

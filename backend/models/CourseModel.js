@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const courseSchema = mongoose.Schema(
   {
+    courseCode:{
+      type:String,
+      required:true,
+    },
     courseName: {
       type: String,
       required: true,
@@ -10,11 +14,16 @@ const courseSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    credits:{
+      type:Number,
+      required:true,
+
+    },
     faculty: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",  
     },
-    createdAt: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },

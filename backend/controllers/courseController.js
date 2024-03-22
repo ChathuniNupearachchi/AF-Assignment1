@@ -5,18 +5,20 @@ const asyncHandler = require('express-async-handler')
 
 module.exports.postCourse__controller = asyncHandler(async (req, res, next) => {
   try {
-    const {courseName, courseDescription } = req.body;
+    const {courseCode,courseName, courseDescription, credits } = req.body;
 
-    if (!courseName || !courseDescription) {
+    if (!courseCode || !courseName || !courseDescription ||!credits) {
       return res.status(400).json({
         error: "Please Provide All Information",
       });
     }
 
     const course = new CourseModel({
+      courseCode,
       courseName,
       courseDescription,
-      createdAt: req.user._id,
+      credits,
+      createdBy: req.user._id,
     });
     course
       .save()
@@ -42,10 +44,12 @@ module.exports.postCourse__controller = asyncHandler(async (req, res, next) => {
 
 module.exports.getCourses__controller = asyncHandler(async (req, res, next) => {
   try {
-    const courses = await CourseModel.find().populate(
-      "createdAt",
-      "role _id userName email",
-       ).populate('faculty', 'role _id userName email');
+    const courses = await CourseModel.find()
+    .populate(
+       'faculty','name Id'
+       // Populate only specific fields from the User model
+    )
+    .select('courseCode courseName courseDescription credits'); // Select all fields from the CourseModel
     return res.status(200).json({
       courses,
     });
