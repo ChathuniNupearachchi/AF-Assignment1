@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const sessionSchema = mongoose.Schema(
 
     {
-        date:{
-            type: Date,
+        sessiondate:{
+            type: String,
             required: true
         },
 
@@ -14,11 +14,11 @@ const sessionSchema = mongoose.Schema(
         },
 
         startTime: { 
-            type: Date, 
+            type: String, 
             required: true 
         },
         endTime: { 
-            type: Date, 
+            type: String, 
             required: true 
         },
 

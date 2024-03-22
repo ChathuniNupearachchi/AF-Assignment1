@@ -4,7 +4,7 @@ const TimetableModel = require("../models/TimetableModel");
 const ResourceModel = require("../models/ResourceModel");
 const SessionModel = require("../models/SessionModel");
 const asyncHandler = require('express-async-handler');
-
+const { DateTime } = require('luxon');
 
 module.exports.CreateTimetable__controller = asyncHandler(async (req, res) => {
 
@@ -33,7 +33,7 @@ module.exports.CreateTimetable__controller = asyncHandler(async (req, res) => {
        if(timetable){
         res.status(201).json({
         _id:timetable._id,
-        course: course.name,
+        course: course.courseName,
         faculty: faculty.name,
         })
        } else{
@@ -50,8 +50,16 @@ module.exports.CreateTimetable__controller = asyncHandler(async (req, res) => {
 
 module.exports.AddSession__controller = asyncHandler(async (req, res) => {
 
+    try{
 
-    const {date, DayOfWeek, startTime, endTime, SessionType, Location, Resource } = req.body;
+    const {sessiondate, DayOfWeek, startTime, endTime, SessionType, Location, Resource } = req.body;
+
+    //Validation
+    if(!sessiondate || !DayOfWeek || !startTime || !endTime || !SessionType || !Location || !Resource ){
+        res.status(400)
+        throw new Error('Please include all fields')
+       }
+   
 
     
     
@@ -62,9 +70,12 @@ module.exports.AddSession__controller = asyncHandler(async (req, res) => {
         throw new Error('Invalid type. Session Type must be one of Lecture,Lab,Tutorial');
     }
 
-    const sessionDate = new Date(date);
+    const currentDate = DateTime.now().toISODate();
 
-    const currentDate = new Date(); // Get the current date
+    const sessionDate = DateTime.fromISO(sessiondate).toISODate(); // Get the current date
+
+    console.log(sessionDate);
+    console.log(currentDate);
 
     // Check if sessionDate is today or a future date
     if (sessionDate < currentDate) {
@@ -92,9 +103,79 @@ module.exports.AddSession__controller = asyncHandler(async (req, res) => {
         return res.status(404).json({ error: 'Resource not found' });
     }
 
-    const startingTime = new Date(`${sessionDate}T${startTime}`);
+     // Create startingTime and endingTime
+     const startingTime = DateTime.fromFormat(startTime, "h.mm a");
+     const endingTime =  DateTime.fromFormat(endTime, "h.mm a");
 
-    const endingTime = new Date(`${sessionDate}T${endTime}`);
+      // Check if end time is after start time
+      if(startingTime >= endingTime){
+        res.status(400);
+        throw new Error('End time should be after start time');
+
+      }
 
 
-})
+
+     //Create new session
+     const session = await SessionModel.create({
+
+        sessiondate,
+        DayOfWeek,
+        startTime,
+        endTime,
+        SessionType,
+        Location,
+        Resource,
+         
+       });
+
+       if(session){
+        res.status(201).json({
+        _id:session._id,
+        time:session.startTime,
+         
+        })
+       } else{
+       res.status(400)
+       throw new error('Invalid user data')
+ }
+
+} catch (error) {
+    console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+        
+    }
+
+});
+
+
+module.exports.AddResource__controller = asyncHandler(async (req, res) => {
+try{
+    const {ResourceType,Location} = req.body;
+
+    const resource = await ResourceModel.create({
+
+        ResourceType,Location
+
+    });
+
+    if(resource){
+        res.status(201).json({
+            _id:resource._id,
+             
+            })
+     } else{
+        res.status(400)
+        throw new error('Invalid resource data')
+     }
+        
+    }
+
+ catch (error) {
+    console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+        
+    }
+
+
+});
