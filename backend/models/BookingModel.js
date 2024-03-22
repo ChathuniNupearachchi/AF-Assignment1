@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const bookingSchema = mongoose.Schema(
     {
 
-        ResourceId: {
+        resourceId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Resource",
             required: true,

@@ -3,6 +3,7 @@ const User = require("../models/userModel")
 const TimetableModel = require("../models/TimetableModel");
 const ResourceModel = require("../models/ResourceModel");
 const SessionModel = require("../models/SessionModel");
+const BookingModel = require("../models/BookingModel");
 const asyncHandler = require('express-async-handler');
 const { DateTime } = require('luxon');
 
@@ -52,10 +53,10 @@ module.exports.AddSession__controller = asyncHandler(async (req, res) => {
 
     try{
 
-    const {sessiondate, DayOfWeek, startTime, endTime, SessionType, Location, Resource } = req.body;
+    const {sessiondate, DayOfWeek, startTime, endTime, SessionType, Location, Resource, TimeTable } = req.body;
 
     //Validation
-    if(!sessiondate || !DayOfWeek || !startTime || !endTime || !SessionType || !Location || !Resource ){
+    if(!sessiondate || !DayOfWeek || !startTime || !endTime || !SessionType || !Location || !Resource ||!TimeTable ){
         res.status(400)
         throw new Error('Please include all fields')
        }
@@ -130,11 +131,26 @@ module.exports.AddSession__controller = asyncHandler(async (req, res) => {
        });
 
        if(session){
-        res.status(201).json({
-        _id:session._id,
-        time:session.startTime,
-         
-        })
+        // Add the session ID to the sessions array in the timetable
+        const timetable = await TimetableModel.findById(TimeTable);
+        if (!timetable) {
+            return res.status(404).json({ error: 'Timetable not found' });
+        }
+
+        timetable.sessions.push(session._id);
+        await timetable.save();
+
+        // Create new booking
+        const booking = await BookingModel.create({
+        sessionId: session._id,
+        resourceId: Resource,
+    });
+
+        // Respond with success
+        return res.status(201).json({
+            _id: session._id,
+            time: session.startTime,
+        });
        } else{
        res.status(400)
        throw new error('Invalid user data')

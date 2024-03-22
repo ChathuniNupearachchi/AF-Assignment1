@@ -39,6 +39,13 @@ const sessionSchema = mongoose.Schema(
             type:mongoose.Schema.Types.ObjectId,
             ref:'Resource',
             
+        },
+
+        TimeTable :{
+            type:mongoose.Schema.Types.ObjectId,
+            ref : 'TimeTable',
+            
+
         }
 
 

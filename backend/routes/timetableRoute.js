@@ -3,6 +3,7 @@ const router = express.Router()
 const {protect} = require('../middleware/authMiddleware')
 const {studentAuthentication} = require('../middleware/authentication')
 const { adminAuthentication } = require("../middleware/authentication")
+const {resourceAvailability} = require("../middleware/resourceAvailability")
 
 const {
     CreateTimetable__controller,
@@ -13,7 +14,7 @@ const {
 
 router.post("/create-timetable",protect,adminAuthentication,CreateTimetable__controller);
 
-router.post("/add-session",protect,adminAuthentication,AddSession__controller);
+router.post("/add-session",protect,adminAuthentication,resourceAvailability,AddSession__controller);
 
 router.post("/add-resources",protect,adminAuthentication,AddResource__controller)
 

@@ -3,16 +3,16 @@ const SessionModel = require('../models/SessionModel')
 
 module.exports.resourceAvailability = asyncHandler(async(req, res, next) => {
 
-    const { Resource, startTime, endTime } = req.body;
+    const { sessiondate , Resource, startTime, endTime } = req.body;
 
-    if (!Resource || !startTime || !endTime) {
+    if (!sessiondate ||!Resource || !startTime || !endTime) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
 
     try {
         // Find sessions for the given resource ID
-        const sessions = await SessionModel.find({ Resource });
+        const sessions = await SessionModel.find({ Resource , sessiondate });
 
         // Check for overlapping sessions
         const overlappingSession = sessions.find(session => {
@@ -25,7 +25,7 @@ module.exports.resourceAvailability = asyncHandler(async(req, res, next) => {
         }
 
         // If no overlapping session found, resource is available
-        res.status(200).json({ available: true });
+         
 
         next();
     } catch (error) {
