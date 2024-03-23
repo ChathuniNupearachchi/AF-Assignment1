@@ -5,14 +5,16 @@ const asyncHandler = require('express-async-handler')
 
 module.exports.enrollCourse__controller = asyncHandler(async (req, res) => {
     try {
-        const { courseId } = req.body;
+        const { courseCode } = req.body;
         const studentId = req.user._id; 
 
         // Check if the course exists
-        const course = await CourseModel.findById(courseId);
+        const course = await CourseModel.findOne({courseCode : courseCode});
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });
         }
+
+        const courseId = course._id;
 
         // Check if the student is already enrolled in the course
         const existingEnrollment = await CourseEnrollmentModel.findOne({ courseId, studentId });
@@ -20,8 +22,20 @@ module.exports.enrollCourse__controller = asyncHandler(async (req, res) => {
             return res.status(400).json({ error: 'You are already enrolled in the course' });
         }
 
+        let enrollmentCode;
+        let newId;
+
+        do {
+            // Generate a random four-digit number
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            newId = "EN" + randomNum.toString();
+        } while (await CourseEnrollmentModel.findOne({ enrollmentCode: newId })); // Check if the generated ID already exists
+
+        enrollmentCode = newId;
+
         // Create a new enrollment
         const enrollment = new CourseEnrollmentModel({
+            enrollmentCode,
             courseId,
             studentId
         });

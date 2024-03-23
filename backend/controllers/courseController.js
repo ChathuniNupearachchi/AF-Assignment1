@@ -63,9 +63,12 @@ module.exports.getCourses__controller = asyncHandler(async (req, res, next) => {
 
 module.exports.getOneCourse__controller = asyncHandler(async (req, res, next) => {
   try {
-    const { courseId } = req.params;
-    console.log(courseId);
-    const course = await CourseModel.findOne({ _id: courseId });
+    const { courseCode } = req.params;
+    console.log(courseCode);
+    const course = await CourseModel.findOne({courseCode : courseCode}) .populate(
+      'faculty','name Id'
+      // Populate only specific fields from the User model
+   ).select('courseCode courseName courseDescription credits');;
     return res.status(200).json({
       course,
     });
@@ -77,11 +80,50 @@ module.exports.getOneCourse__controller = asyncHandler(async (req, res, next) =>
   }
 });
 
+module.exports.updateCourse__controller = asyncHandler(async (req, res, next) => {
+  try {
+    const { courseCode } = req.params;
+    const { courseName, courseDescription, credits } = req.body;
+
+    const updateFields = {};
+
+    if (courseName !== undefined) {
+      updateFields.courseName = courseName;
+    }
+
+    if (courseDescription !== undefined) {
+      updateFields.courseDescription = courseDescription;
+    }
+
+    if (credits !== undefined) {
+      updateFields.credits = credits;
+    }
+
+    const course = await CourseModel.findOneAndUpdate(
+      { courseCode: courseCode },
+      { $set: updateFields },
+      { new: true }
+    );
+
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+
+    return res.status(200).json({ course });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Something went wrong",
+    });
+  }
+});
+
+
 module.exports.deleteCourse__Controller = asyncHandler(async (req, res, next) => {
   try {
-    const { courseId } = req.body;
-    console.log(courseId)
-    const course = await CourseModel.findOneAndDelete({ _id: courseId });
+    const { courseCode } = req.body;
+    console.log(courseCode)
+    const course = await CourseModel.findOneAndDelete( {courseCode : courseCode} );
     return res.status(200).json({
       course,
     });
@@ -96,20 +138,20 @@ module.exports.deleteCourse__Controller = asyncHandler(async (req, res, next) =>
 module.exports.assignFacultyToCourse__controller = asyncHandler(async (req, res, next) => {
   try {
 
-    const { courseId, facultyId } = req.body;
+    const { courseCode, facultyId } = req.body;
 
-    if (!courseId || !facultyId) {
+    if (!courseCode || !facultyId) {
       return res.status(400).json({
         error: "Please Provide All Information",
       });
     }
     
-    const course = await CourseModel.findById(courseId);
+    const course = await CourseModel.findOne({courseCode : courseCode});
     if (!course) {
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    const faculty = await UserModel.findById(facultyId);
+    const faculty = await UserModel.findOne({Id: facultyId });
     if (!faculty && faculty.role != 'Faculty') {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -118,13 +160,13 @@ module.exports.assignFacultyToCourse__controller = asyncHandler(async (req, res,
 
     await course.save();
 
-    return res.status(200).json({ message: 'Faculty assigned successfully', course });
+    return res.status(200).json({ message: 'Faculty assigned successfully' });
 
 
 
     
   } catch (error) {
-    console.log(err);
+    console.log(error);
     return res.status(400).json({
       error: "Something went wrong",
     });

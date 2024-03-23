@@ -29,24 +29,26 @@ const sessionSchema = mongoose.Schema(
             default:'Lecture'
         },
 
-        Location:{
+        LocationID:{
             type:mongoose.Schema.Types.ObjectId,
-            ref:'Resource',
+            ref:'Location',
             required:true
         },
 
-        Resource:{
+        ResourceID:{
             type:mongoose.Schema.Types.ObjectId,
             ref:'Resource',
             
         },
 
-        TimeTable :{
+        FacultyID :{
             type:mongoose.Schema.Types.ObjectId,
-            ref : 'TimeTable',
-            
+            ref:'User',
+            required:true
 
-        }
+        },
+
+         
 
 
 

@@ -1,25 +1,34 @@
-const asyncHandler = require('express-async-handler')
-const SessionModel = require('../models/SessionModel')
+const asyncHandler = require('express-async-handler');
+const SessionModel = require('../models/SessionModel');
+const ResourceModel = require('../models/ResourceModel');
+//const { DateTime } = require('luxon');
 
 module.exports.resourceAvailability = asyncHandler(async(req, res, next) => {
 
-    const { sessiondate , Resource, startTime, endTime } = req.body;
+    const { sessiondate , startTime, endTime, Resource } = req.body;
 
-    if (!sessiondate ||!Resource || !startTime || !endTime) {
+    if (!sessiondate || !Resource || !startTime || !endTime) {
+
         return res.status(400).json({ error: "Missing required fields" });
     }
+
+    console.log("checking resource availability");
 
 
     try {
         // Find sessions for the given resource ID
-        const sessions = await SessionModel.find({ Resource , sessiondate });
+        const resource = await ResourceModel.findOne({ID : Resource});
+        //console.log(resource._id);
 
-        // Check for overlapping sessions
-        const overlappingSession = sessions.find(session => {
-            return (startTime < session.endTime && endTime > session.startTime);
+        const sessions = await SessionModel.find({  ResourceID : resource._id , sessiondate });
+
+        const overlappingSessions = sessions.filter(session => {
+            return (startTime <= session.endTime && endTime >= session.startTime);
         });
-
-        if (overlappingSession) {
+        
+        //console.log(overlappingSessions);
+        
+        if (overlappingSessions.length > 0) {
             // Resource is not available for the new session
             return res.status(409).json({ error: "Resource is not available for the given time slot" });
         }
@@ -37,3 +46,5 @@ module.exports.resourceAvailability = asyncHandler(async(req, res, next) => {
 
 
 })
+
+ 

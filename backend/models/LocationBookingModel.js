@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const bookingSchema = mongoose.Schema(
     {
 
-        resourceId: {
+        locationId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Resource",
+            ref: "Location",
             required: true,
         },
         sessionId: {
@@ -24,6 +24,6 @@ const bookingSchema = mongoose.Schema(
 );
 
  
-  const BookingModel = mongoose.model("Booking", bookingSchema);
+  const LocationBookingModel = mongoose.model("LocationBooking", bookingSchema);
   
-  module.exports = BookingModel;
+  module.exports = LocationBookingModel;

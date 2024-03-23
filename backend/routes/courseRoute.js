@@ -4,6 +4,7 @@ const {
   getOneCourse__controller,
   deleteCourse__Controller,
   assignFacultyToCourse__controller,
+  updateCourse__controller,
 } = require("../controllers/courseController");
 const { adminAuthentication } = require("../middleware/authentication");
 const {protect} = require('../middleware/authMiddleware')
@@ -19,7 +20,9 @@ router.post(
 
 router.get("/get-courses",protect, getCourses__controller);
 
-router.get("/get-course/:courseId", protect, getOneCourse__controller)
+router.get("/get-course/:courseId", protect, getOneCourse__controller);
+
+router.put("/update-course",protect,adminAuthentication,updateCourse__controller)
 
 router.delete('/delete',protect,adminAuthentication,deleteCourse__Controller)
 

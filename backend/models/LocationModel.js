@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
-const resourceSchema = mongoose.Schema(
+const locationSchema = mongoose.Schema(
 
     {
-        ResourceType:{
+        LocationType:{
             type: String,
             required: true
         },
@@ -12,7 +12,10 @@ const resourceSchema = mongoose.Schema(
             type:String,
             required:true
         },
-         
+        Capacity:{
+            type:Number,
+            
+        },
 
         
 
@@ -22,6 +25,6 @@ const resourceSchema = mongoose.Schema(
       }
 );
 
-const ResourceModel = mongoose.model("Resource", resourceSchema);
+const LocationModel = mongoose.model("Location", locationSchema);
 
-module.exports = ResourceModel;
+module.exports = LocationModel;
