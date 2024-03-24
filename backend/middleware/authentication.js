@@ -14,3 +14,12 @@ module.exports.studentAuthentication = (req, res, next) => {
     }
     next()
 }
+
+module.exports.facultyAuthentication = (req, res, next) => {
+    if(req.user.role!== "Faculty"){
+        return res.status(401).json({
+            err:"Access Denied"
+        })
+    }
+    next()
+}
