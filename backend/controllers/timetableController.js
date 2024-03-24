@@ -5,7 +5,9 @@ const ResourceModel = require("../models/ResourceModel");
 const SessionModel = require("../models/SessionModel");
 const ResourceBookingModel = require("../models/ResourceBookingModel");
 const LocationBookingModel = require('../models/LocationBookingModel');
+const CourseEnrollmentModel = require('../models/CourseEnrollModel');
 const LocationModel = require("../models/LocationModel");
+const sendEmail = require('../services/emailServices'); // Import your email service utility
 const asyncHandler = require('express-async-handler');
 const { DateTime } = require('luxon');
 
@@ -254,10 +256,43 @@ module.exports.removeSession = asyncHandler(async (req, res) => {
         await LocationBookingModel.deleteMany({ sessionId: sessionId });
 
         // Delete the session
-        await SessionModel.findByIdAndDelete(sessionId);
+        const deletesession = await SessionModel.findByIdAndDelete(sessionId);
 
-        // Respond with success
-        return res.status(200).json({ message: 'Session deleted successfully' });
+        if (deletesession) {
+            try {
+
+                const timetable = await TimetableModel.findOne({ sessions: sessionId });
+
+                const courseName = await CourseModel.findOne({_id:timetable.courseId}).select('courseName');
+        
+                const enrollments = await CourseEnrollmentModel.find({ courseId: timetable.courseId });
+        
+                const students = enrollments.map(enrollment => enrollment.studentId);
+
+                // Prepare email content
+                const emailSubject = 'Session Cancel Notification';
+                const emailBody = `Dear Student,\n\nThe timetable for ${courseName} has been updated. The session arranged to held on ${session.sessiondate} has been canceled\n\n`;
+
+                await Promise.all(students.map(async (student) => {
+                    const studentEmail = student.email;
+                    await sendEmail(studentEmail, emailSubject, emailBody);
+                }));
+                
+        
+                // Respond with success
+                return res.status(200).json({
+                    message: "Session deleted successfully",
+                    deletesession,
+                    students // Include students in the response
+                });
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+        }
+
+
+         
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -351,14 +386,49 @@ module.exports.UpdateSessionController = asyncHandler(async (req, res) => {
             return res.status(404).json({ error: 'Session not found' });
         }
 
-        
+        if (session) {
+            try {
 
-        // Respond with success
-        return res.status(200).json({
-            message: "Session updated successfully",
-            session,
-             
-        });
+                 
+
+
+                const timetable = await TimetableModel.findOne({ sessions: sessionId });
+
+                const courseName = await CourseModel.findOne({_id:timetable.courseId}).select('courseName');
+        
+                const enrollments = await CourseEnrollmentModel.find({ courseId: timetable.courseId });
+        
+                const students = enrollments.map(enrollment => enrollment.studentId);
+
+                // Prepare email content
+                const emailSubject = 'Session Update Notification';
+                const emailBody = `Dear Student,\n\nThe timetable for ${courseName} has been updated.\n\n`;
+
+                await Promise.all(students.map(async (student) => {
+                    const studentEmail = student.email;
+                    await sendEmail(studentEmail, emailSubject, emailBody);
+                }));
+                
+        
+                // Respond with success
+                return res.status(200).json({
+                    message: "Session updated successfully",
+                    session,
+                    
+                });
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+        }
+
+
+        
+    
+
+    
+    
+    
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
