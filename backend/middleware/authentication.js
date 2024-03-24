@@ -15,8 +15,8 @@ module.exports.studentAuthentication = (req, res, next) => {
     next()
 }
 
-module.exports.facultyAuthentication = (req, res, next) => {
-    if(req.user.role!== "Faculty"){
+module.exports.facultyAdminAuthentication = (req, res, next) => {
+    if(req.user.role!== "Faculty" || req.user.role!== "Admin" ){
         return res.status(401).json({
             err:"Access Denied"
         })
