@@ -23,19 +23,21 @@ const {
 
 
 
-
+//Time Table
 router.post("/create-timetable",protect,adminAuthentication,CreateTimetable__controller);
 router.get("/get-timetables",protect,adminAuthentication,getTimetables_controller)
 
+//Sessions
 router.post("/add-session",protect,sessionValidation,adminAuthentication,locationAvailability,resourceAvailability,AddSession__controller);
 router.delete("/delete-session",protect,adminAuthentication,removeSession);
 router.put("/update-session",protect,adminAuthentication,UpdateSessionController)
 
 
-
+//Resources
 router.post("/add-resources",protect,adminAuthentication,AddResource__controller);
 router.get("/get-resources",protect,adminAuthentication,getResources__controller);
 
+//Locations
 router.post("/add-location",protect,adminAuthentication,AddLocation__controller);
 router.get("/get-locations",protect,adminAuthentication,getLocations__controller);
 

@@ -5,9 +5,9 @@ const {protect} = require('../middleware/authMiddleware')
 const {studentAuthentication} = require('../middleware/authentication')
 
 
-router.post('/', registerUser)
+router.post('/', registerUser) // Register users
 
-router.post('/login', loginUser)
+router.post('/login', loginUser) //Login users
 
 router.get('/me', protect,studentAuthentication,getMe)
 
