@@ -221,6 +221,152 @@ module.exports.AddSession__controller = asyncHandler(async (req, res) => {
 
 });
 
+module.exports.removeSession = asyncHandler(async (req, res) => {
+    try {
+
+        
+      const { sessionId } = req.body;
+
+ 
+        
+        console.log(sessionId);
+
+        
+
+        // Check if the session exists
+        const session = await SessionModel.findById(sessionId);
+        console.log(session);
+        if (!session) {
+            return res.status(404).json({ error: 'Session not found' });
+        }
+
+        // Remove the session from the timetable
+        const timetable = await TimetableModel.findOne({ sessions: sessionId });
+        if (timetable) {
+            timetable.sessions.pull(sessionId);
+            await timetable.save();
+        }
+
+        // Cancel resource booking
+        await ResourceBookingModel.deleteMany({ sessionId: sessionId });
+
+        // Cancel location booking
+        await LocationBookingModel.deleteMany({ sessionId: sessionId });
+
+        // Delete the session
+        await SessionModel.findByIdAndDelete(sessionId);
+
+        // Respond with success
+        return res.status(200).json({ message: 'Session deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+module.exports.UpdateSessionController = asyncHandler(async (req, res) => {
+    try {
+        
+        const { sessionId } = req.query;
+        const { sessiondate, DayOfWeek, startTime, endTime, SessionType , Location , Faculty} = req.body;
+
+        const updateFields = {};
+
+        if (sessiondate !== undefined) {
+        // Check if sessionDate is a future date
+        const sessionDate = DateTime.fromISO(sessiondate).toISODate();
+        const currentDate = DateTime.now().toISODate();
+        if (sessionDate < currentDate) {
+            res.status(400);
+            throw new Error('Invalid Date');
+        }
+          updateFields.sessiondate = sessiondate;
+        }
+
+        if(DayOfWeek !== undefined){
+            // Validate Day
+        const DaysinWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        if (!DaysinWeek.includes(DayOfWeek)) {
+            res.status(400);
+            throw new Error('Invalid Date');
+        }
+        updateFields.DayOfWeek = DayOfWeek;
+        }
+
+        if(startTime !== undefined && endTime !== undefined){
+            // Create startingTime and endingTime
+        const startingTime = DateTime.fromFormat(startTime, "h.mm a");
+        const endingTime = DateTime.fromFormat(endTime, "h.mm a");
+
+        // Check if end time is after start time
+        if (startingTime >= endingTime) {
+            res.status(400);
+            throw new Error('End time should be after start time');
+        }
+        updateFields.startTime = startTime;
+        updateFields.endTime = startTime;
+        }
+
+        if(SessionType !== undefined){
+        // Validate SessionType
+        const validType = ['Lecture', 'Lab', 'Tutorial'];
+        if (!validType.includes(SessionType)) {
+            res.status(400);
+            throw new Error('Invalid type. Session Type must be one of Lecture, Lab, Tutorial');
+        }
+        updateFields.SessionType = SessionType;
+        }
+
+        
+        if(Location !== undefined){
+        // Check if the location exists
+        const location = await LocationModel.findOne({ ID: Location });
+        if (!location) {
+            return res.status(404).json({ error: 'Location not found' });
+        }
+        const LocationID = location._id;
+        updateFields.LocationID = LocationID;
+        }
+
+        
+ 
+        if(Faculty !== undefined){
+        // Check if the faculty exists
+        const faculty = await User.findOne({ Id: Faculty });
+        if (!faculty || faculty.role !== 'Faculty') {
+            return res.status(404).json({ error: 'Faculty not found' });
+        }
+        const FacultyID = faculty._id;
+        updateFields.FacultyID = FacultyID;
+    }
+
+         
+
+        // Update the session
+        const session = await SessionModel.findByIdAndUpdate(sessionId, 
+            { $set: updateFields } , 
+            { new: true });
+
+        if (!session) {
+            return res.status(404).json({ error: 'Session not found' });
+        }
+
+        
+
+        // Respond with success
+        return res.status(200).json({
+            message: "Session updated successfully",
+            session,
+             
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+
 
 module.exports.AddResource__controller = asyncHandler(async (req, res) => {
 try{
@@ -338,3 +484,5 @@ module.exports.AddLocation__controller = asyncHandler(async (req, res) => {
           });
         }
       });
+
+    

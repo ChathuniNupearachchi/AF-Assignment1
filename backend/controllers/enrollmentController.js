@@ -1,7 +1,8 @@
 const CourseEnrollmentModel = require('../models/CourseEnrollModel');
 const CourseModel = require('../models/CourseModel');
+const TimeTableModel = require('../models/TimetableModel');
 const UserModel = require('../models/userModel');
-const asyncHandler = require('express-async-handler')
+const asyncHandler = require('express-async-handler');
 
 module.exports.enrollCourse__controller = asyncHandler(async (req, res) => {
     try {
@@ -81,7 +82,7 @@ module.exports.getEnrolledStudentsForCourse__contoller = asyncHandler(async (req
     }
 })
 
-module.exports.deleteEnrolledStudents__contoller = asyncHandler(async (req, res, next) => {
+module.exports.deleteEnrolledStudents__contoller = asyncHandler(async (req, res) => {
     try {
       const { enrollmentId } = req.body;
       console.log(enrollmentId)
@@ -97,3 +98,56 @@ module.exports.deleteEnrolledStudents__contoller = asyncHandler(async (req, res,
     }
   });
   
+
+  module.exports.viewTimeTable__controller = asyncHandler(async (req, res, next) => {
+
+    try {
+
+        console.log("viewTimeTable__controller started");
+
+        const studentId  = req.user._id;
+
+        console.log(studentId);
+
+          // Find all course enrollments for the student
+        const courseEnrollments = await CourseEnrollmentModel.find({ studentId });
+
+        console.log(courseEnrollments);
+
+        // Extract course IDs from course enrollments
+        const courseIds = courseEnrollments.map(enrollment => enrollment.courseId);
+
+        console.log(courseIds);
+
+        const timetables = await TimeTableModel.find({ courseId: { $in: courseIds } })
+        .populate({
+            
+            path: 'sessions',
+            populate: [
+                { path: 'LocationID', select: 'ID' }, // Selecting only the ID field
+                { path: 'FacultyID' , select: 'Id' } // Assuming you want all fields for FacultyID
+            ],
+            select: 'sessiondate DayOfWeek startTime endTime SessionType LocationID FacultyID' // Select the fields you want to include
+        }).populate({
+            path:'courseId',
+            select:'courseCode courseName'
+        })
+        .select('ID');
+
+        console.log(timetables);
+
+        return res.status(200).json({
+            timetables,
+          });
+
+        
+    } catch (error) {
+        console.log(err);
+      return res.status(400).json({
+        error: "Something went wrong",
+      });
+        
+    }
+
+  });
+  //await SessionModel.find({ _id: { $in: sessions } });
