@@ -30,6 +30,9 @@ app.use('/api/enrollment',require('./routes/enrollRoute'));
 //Timetable Routes
 app.use('/api/timetables',require('./routes/timetableRoute'));
 
+//Notices Route
+app.use('api/notice',require('./routes/NoticeRoute'));
+
 app.use(errorHandler)
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT} `))
