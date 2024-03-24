@@ -1,0 +1,25 @@
+config:
+  target: "http://localhost:4000"  
+  phases:
+    - duration: 300
+      arrivalRate: 5
+
+scenarios:
+  - flow:
+      - post:
+          url: "/api/users"
+          json:
+            name: "Test User"
+            email: "testuser@example.com"
+            password: "password"
+            role: "Student"
+
+      -post:
+          url: "/api/users/login"
+          json: 
+            _id: "ID",
+            name: "User name",
+            email: "User email",
+            role: "User role",
+            token: "Token",    
+

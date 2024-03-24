@@ -65,7 +65,7 @@ module.exports.getEnrolledStudents__contoller = asyncHandler(async (req, res) =>
 
 module.exports.getEnrolledStudentsForCourse__contoller = asyncHandler(async (req, res) => {
     try {
-         const { courseId } = req.params;
+         const { courseId } = req.query;
 
         //Find the course
         const course = await CourseModel.findById(courseId);

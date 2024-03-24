@@ -14,7 +14,7 @@ const {enrollCourse__controller,
 router.put("/enroll",protect,studentAuthentication,enrollCourse__controller)
 router.get("/enrolled-students",protect,adminAuthentication,getEnrolledStudents__contoller)
 router.get("/enrolled-students-forcourse",protect,adminAuthentication,getEnrolledStudentsForCourse__contoller)
-router.delete("/delete-enrolled-students",protect,adminAuthentication,deleteEnrolledStudents__contoller)
+router.delete("/delete-enrolled-student",protect,adminAuthentication,deleteEnrolledStudents__contoller)
 
 router.get("/view-my-timetables",protect,studentAuthentication,viewTimeTable__controller)
  
