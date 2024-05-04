@@ -10,13 +10,113 @@ const { error } = require('console');
 // @desc  Register a new user
 // @route /api/users
 // @accesss Public
+// const registerUser = asyncHandler(async (req, res) => {
+    
+//     const {name, email, password, role} =req.body;
+
+
+//     //Validation
+//     if(!name || !email || !password || !role){
+//      res.status(400)
+//      throw new Error('Please include all fields')
+//     }
+
+//      //check whether the email is a valid one
+//      if (!validator.isEmail(email)) {
+//     res.status(400)
+//      throw new Error('Email is not valid')
+//      }
+
+//      // Validate role
+//     const validRoles = ['Student', 'Faculty', 'Admin'];
+//     if (!validRoles.includes(role)) {
+//         res.status(400);
+//         throw new Error('Invalid role. Role must be one of Student, Faculty, or Admin');
+//     }
+
+//     let Id;
+
+//     if (role == 'Student') {
+//         let newId;
+//         do {
+//             // Generate a random four-digit number
+//             const randomNum = Math.floor(1000 + Math.random() * 9000);
+//             newId = "ST" + randomNum.toString();
+//         } while (await User.findOne({ id: newId })); // Check if the generated ID already exists
+        
+//         Id = newId;
+//     }
+
+//     if (role == 'Faculty') {
+//         let newId;
+//         do {
+//             // Generate a random four-digit number
+//             const randomNum = Math.floor(1000 + Math.random() * 9000);
+//             newId = "FAC" + randomNum.toString();
+//         } while (await User.findOne({ id: newId })); // Check if the generated ID already exists
+        
+//         Id = newId;
+//     }
+
+//     if (role == 'Admin') {
+//         let newId;
+//         do {
+//             // Generate a random four-digit number
+//             const randomNum = Math.floor(1000 + Math.random() * 9000);
+//             newId = "AD" + randomNum.toString();
+//         } while (await User.findOne({ Id: newId })); // Check if the generated ID already exists
+        
+//         Id = newId;
+//     }
+
+
+
+
+//     //Find if user already exists
+//     const userExists = await User.findOne({email})
+    
+//     if(userExists){
+//         res.status(400)
+//         throw new Error('User already exists')
+//     }
+
+//     // Hash password
+//     const salt = await bcrypt.genSalt(10)
+//     const hashedPassword = await bcrypt.hash(password, salt)
+    
+
+
+//     //Create user
+//     const user = await User.create({
+//         name,
+//         email,
+//         password: hashedPassword,
+//         role,
+//         Id,
+//     });
+
+//     if(user){
+//         res.status(201).json({
+//         id:user.Id,
+//         name: user.name,
+//         email: user.email,
+//         role: user.role,
+//         token: generateToken(user._id, user.role),
+//         })
+//  } else{
+//     res.status(400)
+//     throw new error('Invalid user data')
+//  }
+ 
+// })
+
 const registerUser = asyncHandler(async (req, res) => {
     
-    const {name, email, password, role} =req.body;
+    const {name, email, password} =req.body;
 
 
     //Validation
-    if(!name || !email || !password || !role){
+    if(!name || !email || !password){
      res.status(400)
      throw new Error('Please include all fields')
     }
@@ -27,47 +127,7 @@ const registerUser = asyncHandler(async (req, res) => {
      throw new Error('Email is not valid')
      }
 
-     // Validate role
-    const validRoles = ['Student', 'Faculty', 'Admin'];
-    if (!validRoles.includes(role)) {
-        res.status(400);
-        throw new Error('Invalid role. Role must be one of Student, Faculty, or Admin');
-    }
-
-    let Id;
-
-    if (role == 'Student') {
-        let newId;
-        do {
-            // Generate a random four-digit number
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            newId = "ST" + randomNum.toString();
-        } while (await User.findOne({ id: newId })); // Check if the generated ID already exists
-        
-        Id = newId;
-    }
-
-    if (role == 'Faculty') {
-        let newId;
-        do {
-            // Generate a random four-digit number
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            newId = "FAC" + randomNum.toString();
-        } while (await User.findOne({ id: newId })); // Check if the generated ID already exists
-        
-        Id = newId;
-    }
-
-    if (role == 'Admin') {
-        let newId;
-        do {
-            // Generate a random four-digit number
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            newId = "AD" + randomNum.toString();
-        } while (await User.findOne({ Id: newId })); // Check if the generated ID already exists
-        
-        Id = newId;
-    }
+    
 
 
 
@@ -91,17 +151,14 @@ const registerUser = asyncHandler(async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        role,
-        Id,
+        
     });
 
     if(user){
         res.status(201).json({
-        id:user.Id,
         name: user.name,
         email: user.email,
-        role: user.role,
-        token: generateToken(user._id, user.role),
+        token: generateToken(user._id),
         })
  } else{
     res.status(400)
@@ -109,6 +166,7 @@ const registerUser = asyncHandler(async (req, res) => {
  }
  
 })
+
 
 
 // @desc  Login a user

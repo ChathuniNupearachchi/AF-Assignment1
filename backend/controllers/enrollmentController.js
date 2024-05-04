@@ -43,6 +43,7 @@ module.exports.enrollCourse__controller = asyncHandler(async (req, res) => {
         await enrollment.save();
 
         res.json({ message: 'Student enrolled in the course successfully' });
+        
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

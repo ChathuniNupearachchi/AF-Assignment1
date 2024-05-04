@@ -6,6 +6,9 @@ async function sendEmail(to, subject, text) {
         // Create a transporter object using SMTP transport
         const transporter = nodemailer.createTransport({
             service:"gmail",
+            host: "smtp.gmail.com",
+            port : 587,
+            secure : false,
             auth: {
                 user:process.env.SENDER_EMAIL,
                 pass:process.env.SENDER_PASSWORD,// Your email password or app-specific password

@@ -6,6 +6,8 @@ const asyncHandler = require('express-async-handler');
 
 module.exports.createNotice__controller = asyncHandler(async (req, res) => {
 
+  try{
+
     const {notice} = req.body;
 
     const {createdBy} = req.user._id;
@@ -32,6 +34,11 @@ module.exports.createNotice__controller = asyncHandler(async (req, res) => {
         res.status(400)
         throw new error('Something went wrong')
     }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+}
   
 
 

@@ -22,21 +22,35 @@ module.exports.resourceAvailability = asyncHandler(async(req, res, next) => {
 
         const sessions = await SessionModel.find({  ResourceID : resource._id , sessiondate });
 
-        const overlappingSessions = sessions.filter(session => {
-            return (startTime <= session.endTime && endTime >= session.startTime);
+         
+        // Check for overlapping sessions
+        const overlappingSession = sessions.find(session => {
+            return (
+                session.sessiondate === sessiondate &&
+                ((startTime >= session.startTime && startTime < session.endTime) ||
+                (endTime > session.startTime && endTime <= session.endTime) ||
+                (startTime <= session.startTime && endTime >= session.endTime))
+            );
         });
-        
-        //console.log(overlappingSessions);
-        
-        if (overlappingSessions.length > 0) {
-            // Resource is not available for the new session
+
+        if (overlappingSession) {
+            // Found overlapping session
             return res.status(409).json({ error: "Resource is not available for the given time slot" });
         }
+    
+
+        console.log(overlappingSession);
+        
+        // if (overlappingSession.length > 0) {
+        //     // Resource is not available for the new session
+        //     return res.status(409).json({ error: "Session is invalid" });
+        // }
 
         // If no overlapping session found, resource is available
          
 
         next();
+
     } catch (error) {
         // Handle any errors that occur during the database query
         console.error("Error checking resource availability:", error);

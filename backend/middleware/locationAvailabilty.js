@@ -21,16 +21,43 @@ module.exports.locationAvailability = asyncHandler(async(req, res, next) => {
         const location = await LocationModel.findOne({ID : Location});
         const sessions = await SessionModel.find({ LocationID : location._id , sessiondate });
 
-        // Check for overlapping sessions
-        const overlappingSession = sessions.filter(session => {
+        // // Check for overlapping sessions
+        // const overlappingSession = sessions.filter(session => {
 
-            return (startTime <= session.endTime  &&  endTime >=  session.startTime);
+        //     return (startTime <= session.endTime  &&  endTime >=  session.startTime);
+        // });
+
+        // if (overlappingSession.length>0) {
+        //     // Resource is not available for the new session
+        //     return res.status(409).json({ error: "Location is not available for the given time slot" });
+        // }
+
+        // // If no overlapping session found, resource is available
+         
+
+        // next();
+        // Check for overlapping sessions
+        const overlappingSession = sessions.find(session => {
+            return (
+                session.sessiondate === sessiondate &&
+                ((startTime >= session.startTime && startTime < session.endTime) ||
+                (endTime > session.startTime && endTime <= session.endTime) ||
+                (startTime <= session.startTime && endTime >= session.endTime))
+            );
         });
 
-        if (overlappingSession.length>0) {
-            // Resource is not available for the new session
+        if (overlappingSession) {
+            // Found overlapping session
             return res.status(409).json({ error: "Location is not available for the given time slot" });
         }
+    
+
+        console.log(overlappingSession);
+        
+        // if (overlappingSession.length > 0) {
+        //     // Resource is not available for the new session
+        //     return res.status(409).json({ error: "Session is invalid" });
+        // }
 
         // If no overlapping session found, resource is available
          

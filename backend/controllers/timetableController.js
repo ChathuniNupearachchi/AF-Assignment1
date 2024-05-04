@@ -271,11 +271,21 @@ module.exports.removeSession = asyncHandler(async (req, res) => {
 
                 // Prepare email content
                 const emailSubject = 'Session Cancel Notification';
-                const emailBody = `Dear Student,\n\nThe timetable for ${courseName} has been updated. The session arranged to held on ${session.sessiondate} has been canceled\n\n`;
+                const emailBody = `Dear Student,\n\nThe timetable for ${courseName} has been canceled. The session arranged to held on ${session.sessiondate} has been canceled\n\n`;
 
-                await Promise.all(students.map(async (student) => {
-                    const studentEmail = student.email;
-                    await sendEmail(studentEmail, emailSubject, emailBody);
+                await Promise.all(students.map(async (studentId) => {
+                    try {
+                        const student = await User.findById(studentId); // Assuming StudentModel is your Mongoose model for students
+                        if (student && student.email) {
+                            const studentEmail = student.email;
+                            console.log(studentEmail);
+                            await sendEmail(studentEmail, emailSubject, emailBody);
+                        } else {
+                            console.log(`Student with ID ${studentId} not found or does not have an email address.`);
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching student with ID ${studentId}:`, error);
+                    }
                 }));
                 
         
@@ -303,6 +313,7 @@ module.exports.UpdateSessionController = asyncHandler(async (req, res) => {
     try {
         
         const { sessionId } = req.query;
+        console.log(sessionId);
         const { sessiondate, DayOfWeek, startTime, endTime, SessionType , Location , Faculty} = req.body;
 
         const updateFields = {};
@@ -400,15 +411,32 @@ module.exports.UpdateSessionController = asyncHandler(async (req, res) => {
         
                 const students = enrollments.map(enrollment => enrollment.studentId);
 
+                console.log(students);
+
                 // Prepare email content
                 const emailSubject = 'Session Update Notification';
                 const emailBody = `Dear Student,\n\nThe timetable for ${courseName} has been updated.\n\n`;
 
-                await Promise.all(students.map(async (student) => {
-                    const studentEmail = student.email;
-                    await sendEmail(studentEmail, emailSubject, emailBody);
-                }));
+                // await Promise.all(students.map(async (student) => {
+                //     const studentEmail = student.email;
+                //     console.log(studentEmail);
+                //     await sendEmail(studentEmail, emailSubject, emailBody);
+                // }));
                 
+                await Promise.all(students.map(async (studentId) => {
+                    try {
+                        const student = await User.findById(studentId); // Assuming StudentModel is your Mongoose model for students
+                        if (student && student.email) {
+                            const studentEmail = student.email;
+                            console.log(studentEmail);
+                            await sendEmail(studentEmail, emailSubject, emailBody);
+                        } else {
+                            console.log(`Student with ID ${studentId} not found or does not have an email address.`);
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching student with ID ${studentId}:`, error);
+                    }
+                }));
         
                 // Respond with success
                 return res.status(200).json({

@@ -63,7 +63,7 @@ module.exports.getCourses__controller = asyncHandler(async (req, res, next) => {
 
 module.exports.getOneCourse__controller = asyncHandler(async (req, res, next) => {
   try {
-    const { courseCode } = req.params;
+    const { courseCode } = req.query;
     console.log(courseCode);
     const course = await CourseModel.findOne({courseCode : courseCode}) .populate(
       'faculty','name Id'
@@ -82,7 +82,8 @@ module.exports.getOneCourse__controller = asyncHandler(async (req, res, next) =>
 
 module.exports.updateCourse__controller = asyncHandler(async (req, res, next) => {
   try {
-    const { courseCode } = req.params;
+    const { courseCode } = req.query;
+    console.log('Course Code:', courseCode);
     const { courseName, courseDescription, credits } = req.body;
 
     const updateFields = {};

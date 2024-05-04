@@ -7,6 +7,7 @@ const TimeTableModel = require('../models/TimetableModel');
 module.exports.sessionValidation = asyncHandler(async(req, res, next) => {
 
     const { sessiondate , startTime, endTime, TimeTable } = req.body;
+
     console.log("start session validation");
 
     if (!sessiondate || !TimeTable || !startTime || !endTime) {
@@ -14,7 +15,7 @@ module.exports.sessionValidation = asyncHandler(async(req, res, next) => {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
-    //console.log("checking sessions");
+    console.log("checking sessions");
 
 
     try {
@@ -22,32 +23,40 @@ module.exports.sessionValidation = asyncHandler(async(req, res, next) => {
         const timetable = await TimeTableModel.findOne({ID : TimeTable});
         //console.log(resource._id);
 
+        console.log(timetable);
+
         const sessions = timetable.sessions;
+
+        console.log(sessions);
 
         // Fetch all sessions from the database
         const allSessions = await SessionModel.find({ _id: { $in: sessions } });
 
         //console.log(allSessions);
 
-        // const overlappingSessions = sessions.filter(session => {
-        //     return (startTime <= session.endTime && endTime >= session.startTime && sessiondate==session.sessiondate);
-        // });
-        
-        const overlappingSessions = allSessions.filter(session => {
+       
+        // Check for overlapping sessions
+        const overlappingSession = allSessions.find(session => {
             return (
                 session.sessiondate === sessiondate &&
-                session.startTime < endTime &&
-                session.endTime > startTime
+                ((startTime >= session.startTime && startTime < session.endTime) ||
+                (endTime > session.startTime && endTime <= session.endTime) ||
+                (startTime <= session.startTime && endTime >= session.endTime))
             );
         });
+
+        if (overlappingSession) {
+            // Found overlapping session
+            return res.status(409).json({ error: "Session time slot clashes with existing session" });
+        }
     
 
-        //console.log(overlappingSessions);
+        console.log(overlappingSession);
         
-        if (overlappingSessions.length > 0) {
-            // Resource is not available for the new session
-            return res.status(409).json({ error: "Session is invalid" });
-        }
+        // if (overlappingSession.length > 0) {
+        //     // Resource is not available for the new session
+        //     return res.status(409).json({ error: "Session is invalid" });
+        // }
 
         // If no overlapping session found, resource is available
          

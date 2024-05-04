@@ -3,6 +3,7 @@ const colors = require('colors')
 const dotenv = require('dotenv').config()
 const {errorHandler} = require('./middleware/errorMiddleware')
 const connectDB = require('./config/db')
+const cors = require('cors'); // Import the cors package
 const PORT = process.env.PORT || 4000
 
 
@@ -10,6 +11,8 @@ const PORT = process.env.PORT || 4000
 connectDB()
 
 const app = express()
+
+app.use(cors()); // Use cors as middleware
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -31,7 +34,7 @@ app.use('/api/enrollment',require('./routes/enrollRoute'));
 app.use('/api/timetables',require('./routes/timetableRoute'));
 
 //Notices Route
-app.use('api/notice',require('./routes/NoticeRoute'));
+app.use('/api/notices',require('./routes/NoticeRoute'));
 
 app.use(errorHandler)
 
