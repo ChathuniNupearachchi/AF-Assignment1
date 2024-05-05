@@ -5,6 +5,7 @@ import { FaSignInAlt } from "react-icons/fa";
 import {useSelector, useDispatch} from 'react-redux';
 import {login,reset} from '../features/auth/authSlice'
 import Spinner from "../components/Spinner";
+import axios from "axios";
 
 
 function Login(){
@@ -21,6 +22,25 @@ function Login(){
 
         const {user, isError,isSuccess,isLoading , message} = useSelector(state => state.auth)
 
+        axios.defaults.withCredentials = true;
+
+        
+        useEffect(() => {
+     
+        axios.get('http://localhost:4000')
+        .then(res => 
+             {
+              if(res.data.valid){
+
+               navigate('/')
+                  
+              }else{
+                navigate('/login')
+              }
+             })
+        .catch(err => console.log(err))
+
+       }, [])
 
         
         useEffect(() => {
@@ -53,6 +73,8 @@ function Login(){
             
             dispatch(login(userData))
         }
+
+
 
         if(isLoading){
             return <Spinner />

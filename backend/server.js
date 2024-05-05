@@ -4,7 +4,12 @@ const dotenv = require('dotenv').config()
 const {errorHandler} = require('./middleware/errorMiddleware')
 const connectDB = require('./config/db')
 const cors = require('cors'); // Import the cors package
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 4000
+ 
+
 
 
 //Connect to database
@@ -12,13 +17,36 @@ connectDB()
 
 const app = express()
 
-app.use(cors()); // Use cors as middleware
+app.use(cors(
+    {
+        origin: ['http://localhost:3000'], // Allow frontend to connect to backend
+        methods: ['GET', 'POST'], // Allow the following methods
+        credentials: true // Allow cookies to be sent from frontend to backend
+    }
+)); // Use cors as middleware
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(session({   
+    secret:'secret',
+    resave:false,
+    saveUninitialized:false,
+    cookie:{
+        secure:false,
+        maxAge:1000*60*60*24
+
+    }
+}));
+
 
 app.get('/', (req, res) => {
-    res.status(200).json({message: 'Welcome to the SLIIT'})
+    if(req.session.email){
+        return res.json({valid : true , email : req.session.email})
+    }else{
+        return res.json({valid : false})
+    }
 })
 
 //User Routes

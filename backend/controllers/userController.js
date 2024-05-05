@@ -179,12 +179,16 @@ const loginUser = asyncHandler(async (req, res) => {
 
     //Check user and password match
     if(user && (await bcrypt.compare(password, user.password))){
+
+        req.session.email = user.email;
+        console.log(req.session.email);
+
       res.status(200).json({
         _id:user.Id,
         name: user.name,
         email: user.email,
-        role: user.role,
-        token: generateToken(user._id, user.role),  
+        
+        token: generateToken(user._id),  
     })
     
     
@@ -216,8 +220,14 @@ const generateToken = (id, role) => {
     })
 }
 
+const logoutUser = (req, res) => {
+    res.clearCookie('connect.sid');
+    res.json({ message: 'Logged out successfully' });
+  };
+
 module.exports = {
     registerUser,
     loginUser,
     getMe,
+    logoutUser,
 }
